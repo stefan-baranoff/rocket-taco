@@ -14,4 +14,15 @@ module Api
     [resp.parsed_response["data"]["userId"], resp.parsed_response["data"]["authToken"]]
   end
 
+  def Api.ims server, port, userId, authToken
+    url = "http://%s:%d/api/v1/im.list" % [server, port]
+    headers = {"Content-type" => "application/json", "X-Auth-Token" => authToken, "X-User-Id" => userId}
+    resp = HTTParty.get(url, :headers => headers)
+    ims = []
+    for im in resp.parsed_response["ims"]
+      ims.push(im["_id"])
+    end
+    ims
+  end
+
 end
