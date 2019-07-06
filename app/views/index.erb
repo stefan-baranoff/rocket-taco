@@ -12,28 +12,27 @@
     <hr/>
 
     <h2 style="font-family:arial"> Status </h2>
-    <form> <font id=status color=#ff0000> Not Connected
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+    <form> <font id=status color=<%= {"Not Connected" => "#ff0000", "Connected" => "#00ff00"}[status] %> > <%= status  %> </font>
        <button type=submit> Refresh </button> </form>
 
     <h2 style="font-family:arial"> Settings </h2>
-    <form>
+    <form method=GET action=/update>
       <table>
         <tr>
           <td> Server: </td>
-          <td> http:// <input value=localhost size=13 /> </td>
+          <td> http:// <inpsut name=server value=<%= server %> size=13 /> </td>
         </tr>
         <tr>
           <td> Port: </td>
-          <td> <input value=4567> </td>
+          <td> <input name=port value=<%= port %> > </td>
         </tr>
-        <tr>
+        <tr>"#ff00"#f"#ff0000" if status == "Not Connected" else ("#ffff00" if status == "Connecting" else "#00ff00")f0000" if status == "Not Connected" else ("#ffff00" if status == "Connecting" else "#00ff00")00" if status == "Not Connected" else ("#ffff00" if status == "Connecting" else "#00ff00")
           <td> Rocket Taco Username: </td>
-          <td> <input value=rocket_taco> </td>
+          <td> <input name=user value=<%= user %>> </td>
         </tr>
         <tr>
           <td> Rocket Taco Password: </td>
-          <td> <input value=taco> </td>
+          <td> <input name=password value=<%= password %>> </td>
         </tr>
         <tr>
           <td colspan=2> <br/><center> <button type=submit> Update </button> </center> </td>

@@ -11,3 +11,5 @@ user = args['-u']
 password = args['-P']
 
 userId, authToken = Api.login server, port, user, password
+ims = Api.ims server, port, userId, authToken
+Api.messages server, port, userId, authToken, ims[0]

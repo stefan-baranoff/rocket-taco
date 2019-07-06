@@ -7,3 +7,5 @@ git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
 # gem "rails"
 
 gem "httparty", "~> 0.17.0"
+
+gem "sinatra", "~> 2.0"
