@@ -17,16 +17,16 @@
 
     <h2 style="font-family:arial"> Settings </h2>
     <form method=GET action=/update>
-      <table>
+      <table style="width: 600px" border=0>
         <tr>
           <td> Server: </td>
-          <td> http:// <inpsut name=server value=<%= server %> size=13 /> </td>
+          <td> http:// <input name=server value=<%= server %> size=13 /> </td>
         </tr>
         <tr>
           <td> Port: </td>
           <td> <input name=port value=<%= port %> > </td>
         </tr>
-        <tr>"#ff00"#f"#ff0000" if status == "Not Connected" else ("#ffff00" if status == "Connecting" else "#00ff00")f0000" if status == "Not Connected" else ("#ffff00" if status == "Connecting" else "#00ff00")00" if status == "Not Connected" else ("#ffff00" if status == "Connecting" else "#00ff00")
+        <tr>
           <td> Rocket Taco Username: </td>
           <td> <input name=user value=<%= user %>> </td>
         </tr>
@@ -34,6 +34,16 @@
           <td> Rocket Taco Password: </td>
           <td> <input name=password value=<%= password %>> </td>
         </tr>
+      </table>
+
+      <h2 style="font-family:arial"> Channels </h2>
+      <table style="width: 600px" border=0>
+        <% for channel in channels %>
+          <%= "<tr>" %>
+            <%= "<td> # #{channel[0]} </td>" %>
+            <%= '<td> <font color="#00ff00"> <input name=channels value=#{channel[0]} type=checkbox> Connected </font> </td>' %>
+          <%= "</tr>" %>
+        <% end %>
         <tr>
           <td colspan=2> <br/><center> <button type=submit> Update </button> </center> </td>
         </tr>
