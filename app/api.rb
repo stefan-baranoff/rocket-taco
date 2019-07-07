@@ -26,7 +26,7 @@ module Api
     end
     if resp.parsed_response["status"] == "error"
       puts "Error logging in: %s" % [resp.parsed_response["error"]]
-      return [False, False]
+      return [false, false]
     end
     [resp.parsed_response["data"]["userId"], resp.parsed_response["data"]["authToken"]]
   end
@@ -55,6 +55,24 @@ module Api
       names.push([int["name"], int["_id"], int["channel"]])
     end
     names
+  end
+
+  def Api.addInt server, port, user, userId, authToken, channel
+    url = Api.getUrl server, port, "integrations.create"
+    headers = Api.getHeaders userId, authToken
+    data = {
+      :type => "webhook-outgoing",
+      :name => "Rocket Taco for #{channel}",
+      :enabled => true,
+      :event => "sendMessage",
+      :username => user,
+      :urls => ["http://localhost:4567/taco?channel=#{channel}"],
+      :triggerWords => [":taco:"],
+      :channel => "##{channel}",
+      :scriptEnabled => false
+    }
+    puts data.to_json()
+    puts HTTParty.post(url, :headers => headers, :body => data.to_json()).parsed_response
   end
 
 end

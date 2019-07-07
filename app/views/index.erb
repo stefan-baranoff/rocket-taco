@@ -41,7 +41,7 @@
         <% for channel in channels %>
           <%= "<tr>" %>
             <%= "<td> # #{channel[0]} </td>" %>
-            <%= '<td> <font color="#00ff00"> <input name=channels value=#{channel[0]} type=checkbox> Connected </font> </td>' %>
+            <%= "<td> <font color=#{{"Not Connected" => "#ff0000", "Connected" => "#00ff00"}[channel_stat[channel[0]]]}> <input name=channels value=#{channel[0]} type=checkbox> #{channel_stat[channel[0]]} </font> </td>" %>
           <%= "</tr>" %>
         <% end %>
         <tr>
