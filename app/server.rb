@@ -65,7 +65,18 @@ get "/update" do
 end
 
 post "/taco" do
-  puts params
+  user, msg = Api.getChanMessage $server, $port, $userId, $authToken, "#{params[:channel]}"
+  quant = 0
+  users = []
+  for word in msg.split(" ")
+    if word[0] == "@"
+      users.push(word[1..-1])
+    end
+    if word == ":taco:"
+      quant += 1
+    end
+  end
+  puts "#{user} gave #{quant} tacos to #{users}"
 end
 
 get "/icon.png" do

@@ -75,4 +75,19 @@ module Api
     puts HTTParty.post(url, :headers => headers, :body => data.to_json()).parsed_response
   end
 
+  def Api.getChanId server, port, userId, authToken, room
+    url = Api.getUrl server, port, "channels.info?roomName=#{room}"
+    headers = Api.getHeaders userId, authToken
+    HTTParty.get(url, :headers => headers).parsed_response["channel"]["_id"]
+  end
+
+  def Api.getChanMessage server, port, userId, authToken, room
+    chanId = Api.getChanId server, port, userId, authToken, room
+    url = Api.getUrl server, port, "channels.history?roomId=#{chanId}&count=1"
+    headers = Api.getHeaders userId, authToken
+    resp = HTTParty.get(url, :headers => headers).parsed_response
+    puts resp
+    [resp["messages"][0]["u"]["username"], resp["messages"][0]["msg"]]
+  end
+
 end
