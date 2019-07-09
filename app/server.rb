@@ -70,15 +70,19 @@ post "/taco" do
   user, msg = Api.getChanMessage $server, $port, $userId, $authToken, "#{params[:channel]}"
   quant = 0
   users = []
+  reason = []
   for word in msg.split(" ")
     if word[0] == "@"
       users.push(word[1..-1])
-    end
-    if word == ":taco:"
+    elsif word == ":taco:"
       quant += 1
+    else
+      reason.push(word)
     end
   end
-  puts "#{user} gave #{quant} tacos to #{users}"
+  reason = reason.join " "
+  puts "#{user} gave #{quant} tacos to #{users} for reason: #{reason} on channel #{params[:channel]}"
+  Db.insertTaco db, params[:channel], user, users, quant, reason
 end
 
 get "/icon.png" do

@@ -40,9 +40,16 @@ module Db
       Db.ensureDatumExists db, "settings", "key", "username", ["'username'", "'rocket_chat'"]
       Db.ensureDatumExists db, "settings", "key", "password", ["'password'", "'taco'"]
       for chan in channels
-        Db.ensureTableExists db, chan, ['time', 'giver', 'receiver', 'amount', 'reason'], ['date', 'string', 'string', 'int', 'string']
+        Db.ensureTableExists db, chan[0], ['time', 'giver', 'receiver', 'amount', 'reason'], ['real', 'string', 'string', 'int', 'string']
       end
       db
+  end
+
+  def Db.insertTaco db, chan, giver, receiver, quant, reason
+    for recv in receiver
+      puts "insert into #{chan} values (julianday('now'), '#{giver}', '#{recv}', #{quant}, '#{reason}');"
+      db.execute "insert into #{chan} values (julianday('now'), '#{giver}', '#{recv}', #{quant}, '#{reason}');"
+    end
   end
 
 end
