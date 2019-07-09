@@ -1,6 +1,7 @@
 require "sinatra"
 
 require_relative 'api'
+require_relative 'db'
 
 set :bind => "0.0.0.0"
 
@@ -38,6 +39,7 @@ def update server, port, user, password
 end
 
 update $server, $port, $user, $password
+db = Db.init $channels
 
 get "/" do
   locals = {
