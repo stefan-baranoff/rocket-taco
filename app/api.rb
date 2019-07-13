@@ -90,4 +90,20 @@ module Api
     [resp["messages"][0]["u"]["username"], resp["messages"][0]["msg"]]
   end
 
+  # def Api.directMessage server, port, userId, authToken, user, msg
+  #   direct_messages = Api.listDirectMessages server, port, userId, authToken
+  #   room = nil
+  #   for direct_message in direct_messages
+  #     users = Api.directMessageUsers(server, port, userId, authToken, direct_message)
+  #     if users.include? user
+  #       room = direct_message
+  #       break
+  #     end
+  #   end
+  #   if room == nil
+  #     room = Api.createDirectMessage server, port, userId, authToken, user
+  #   end
+  #   Api.sendMessage
+  # end
+
 end

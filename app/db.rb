@@ -39,6 +39,7 @@ module Db
       Db.ensureDatumExists db, "settings", "key", "port", ["'port'", "'3000'"]
       Db.ensureDatumExists db, "settings", "key", "username", ["'username'", "'rocket_chat'"]
       Db.ensureDatumExists db, "settings", "key", "password", ["'password'", "'taco'"]
+      Db.ensureTableExists db, "tacos", ['user', 'amount'], ['string', 'int']
       for chan in channels
         Db.ensureTableExists db, chan[0], ['time', 'giver', 'receiver', 'amount', 'reason'], ['real', 'string', 'string', 'int', 'string']
       end
@@ -46,10 +47,16 @@ module Db
   end
 
   def Db.insertTaco db, chan, giver, receiver, quant, reason
-    for recv in receiver
-      puts "insert into #{chan} values (julianday('now'), '#{giver}', '#{recv}', #{quant}, '#{reason}');"
-      db.execute "insert into #{chan} values (julianday('now'), '#{giver}', '#{recv}', #{quant}, '#{reason}');"
+    Db.ensureDatumExists db, "tacos", "user", giver, ["'#{giver}'", 5]
+    tacos_left = db.execute("select amount from tacos where user = '#{giver}'")[0][0]
+    if tacos_left >= quant * receiver.length
+      for recv in receiver
+        db.execute "insert into #{chan} values (julianday('now'), '#{giver}', '#{recv}', #{quant}, '#{reason}');"
+      end
+      db.execute "update tacos set amount = #{tacos_left - quant * receiver.length} where user = '#{giver}'"
+      return true
     end
+    false
   end
 
 end
