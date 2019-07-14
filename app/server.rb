@@ -26,23 +26,26 @@ end
 
 def update server, port, user, password
   $userId, $authToken, $status = login $server, $port, $user, $password
-  $channels = Api.listChannels $server, $port, $userId, $authToken
-  $ints = Api.listInt $server, $port, $userId, $authToken
-  $channel_stat = {}
-  for chan in $channels
-    $channel_stat[chan[0]] = "Not Connected"
-  end
-  global_int = false
-  for int in $ints
-    if int[0].include? "Rocket Taco"
-      if int[0].include? "Global"
-        global_int = true
-      end
-      $channel_stat[int[2][0][1..-1]] = "Connected"
+  if $status == "Connected"
+    $channels = Api.listChannels $server, $port, $userId, $authToken
+    $ints = Api.listInt $server, $port, $userId, $authToken
+    $channel_stat = {}
+    for chan in $channels
+      $channel_stat[chan[0]] = "Not Connected"
     end
-  end
-  if global_int == false
-    Api.addGlobalInt $server, $port, $user, $userId, $authToken
+    global_int = false
+    for int in $ints
+      if int[0].include? "Rocket Taco"
+        if int[0].include? "Global"
+          global_int = true
+        end
+        $channel_stat[int[2][0][1..-1]] = "Connected"
+      end
+    end
+    if global_int == false
+      Api.addGlobalInt $server, $port, $user, $userId, $authToken
+    end
+    Api.setAvatar $server, $port, $userId, $authToken
   end
 end
 

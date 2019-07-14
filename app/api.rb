@@ -145,4 +145,11 @@ module Api
     Api.sendMessage server, port, userId, authToken, room, msg
   end
 
+  def Api.setAvatar server, port, userId, authToken
+    url = Api.getUrl server, port, "users.setAvatar"
+    headers = Api.getHeaders userId, authToken
+    data = {:avatarUrl => "http://localhost:4567/icon.png"}
+    puts HTTParty.post(url, :headers => headers, :body => data.to_json()).parsed_response
+  end
+
 end
