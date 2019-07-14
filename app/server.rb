@@ -82,10 +82,11 @@ post "/taco" do
   end
   reason = reason.join " "
   puts "#{user} gave #{quant} tacos to #{users} for reason: #{reason} on channel #{params[:channel]}"
-  puts Db.insertTaco db, params[:channel], user, users, quant, reason
-  #  Api.directMessage $server, $port, $userId, $authToken, user, "Successfully gave #{quant} tacos to #{users,join ', '}!"
-  # else
-  #  Api.directMessage $server, $port, $userId, $authToken, user, "Insufficient tacos to give #{quant} tacos to #{users,join ', '}"
+  if Db.insertTaco db, params[:channel], user, users, quant, reason
+    Api.directMessage $server, $port, $userId, $authToken, user, "Successfully gave #{quant} tacos to #{users.join(', ')}!"
+  else
+    Api.directMessage $server, $port, $userId, $authToken, user, "You don't have enough tacos to give #{quant} taco(s) to #{users.join(', ')}"
+  end
 end
 
 get "/icon.png" do
