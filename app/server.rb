@@ -101,9 +101,25 @@ end
 post "/command" do
   req= JSON.parse(request.body.read)
   user, msg, channel = req["user_name"], req["text"], req["channel_id"]
-  if msg.include? "tacos"
+  if msg.include? "!tacos"
     tacos = Db.getTacos db, user
     Api.sendMessage $server, $port, $userId, $authToken, channel, "You have #{tacos} tacos"
+  end
+  if msg.include? "!help"
+    help = %q(
+
+      *Giving tacos*
+           - Give tacos by sending a message including :taco: emojis and @username(s)
+           - Number of :taco: emoji specifies the number of tacos to give
+           - Can have multiple recipients
+               - E.g. :taco: :taco: @user1 @user2 will give 2 tacos to user1 and 2 tacos to user 2
+      *Utility Commands*
+           - !tacos - how many tacos you have left to give today
+           - !leaderboard - display highest taco givers and receivers
+           - !help - display this message
+    )
+    puts help
+    Api.sendMessage $server, $port, $userId, $authToken, channel, help
   end
 end
 
