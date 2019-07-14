@@ -57,9 +57,13 @@ module Api
     names
   end
 
-  def Api.addInt server, port, user, userId, authToken, channel
+  def Api.addInt server, port, user, userId, authToken, data
     url = Api.getUrl server, port, "integrations.create"
     headers = Api.getHeaders userId, authToken
+    HTTParty.post(url, :headers => headers, :body => data.to_json())
+  end
+
+  def Api.addChannelInt server, port, user, userId, authToken, channel
     data = {
       :type => "webhook-outgoing",
       :name => "Rocket Taco for #{channel}",
@@ -71,7 +75,21 @@ module Api
       :channel => "##{channel}",
       :scriptEnabled => false
     }
-    HTTParty.post(url, :headers => headers, :body => data.to_json())
+    Api.addInt server, port, user, userId, authToken, data
+  end
+
+  def Api.addGlobalInt server, port, user, userId, authToken
+    data = {
+      :type => "webhook-outgoing",
+      :name => "Rocket Taco Global",
+      :enabled => true,
+      :event => "sendMessage",
+      :username => user,
+      :urls => ["http://localhost:4567/command"],
+      :channel => "@#{user}",
+      :scriptEnabled => false
+    }
+    Api.addInt server, port, user, userId, authToken, data
   end
 
   def Api.listDirectMessages server, port, userId, authToken

@@ -32,10 +32,17 @@ def update server, port, user, password
   for chan in $channels
     $channel_stat[chan[0]] = "Not Connected"
   end
+  global_int = false
   for int in $ints
     if int[0].include? "Rocket Taco"
+      if int[0].include? "Global"
+        global_int = true
+      end
       $channel_stat[int[2][0][1..-1]] = "Connected"
     end
+  end
+  if global_int == false
+    Api.addGlobalInt $server, $port, $user, $userId, $authToken
   end
 end
 
@@ -61,7 +68,7 @@ get "/update" do
   $user = params[:user]
   $password = params[:password]
   if params[:channels]
-    Api.addInt $server, $port, $user, $userId, $authToken, params[:channels]
+    Api.addCreateInt $server, $port, $user, $userId, $authToken, params[:channels]
   end
   update $server, $port, $user, $password
   redirect "/"
