@@ -1,3 +1,4 @@
+require "json"
 require "sinatra"
 
 require_relative 'api'
@@ -67,7 +68,9 @@ get "/update" do
 end
 
 post "/taco" do
-  user, msg = Api.getChanMessage $server, $port, $userId, $authToken, "#{params[:channel]}"
+  puts request
+  req= JSON.parse(request.body.read)
+  user, msg = req["user_name"], req["text"]
   quant = 0
   users = []
   reason = []
@@ -81,9 +84,9 @@ post "/taco" do
     end
   end
   reason = reason.join " "
-  puts "#{user} gave #{quant} tacos to #{users} for reason: #{reason} on channel #{params[:channel]}"
   if Db.insertTaco db, params[:channel], user, users, quant, reason
-    Api.directMessage $server, $port, $userId, $authToken, user, "Successfully gave #{quant} tacos to #{users.join(', ')}!"
+    puts "#{user} gave #{quant} tacos to #{users} for reason: #{reason} on channel #{params[:channel]}"
+    Api.directMessage $server, $port, $userId, $authToken, user, "You have successfully given #{quant} tacos to #{users.join(', ')}!"
   else
     Api.directMessage $server, $port, $userId, $authToken, user, "You don't have enough tacos to give #{quant} taco(s) to #{users.join(', ')}"
   end

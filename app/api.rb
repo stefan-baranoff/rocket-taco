@@ -71,22 +71,7 @@ module Api
       :channel => "##{channel}",
       :scriptEnabled => false
     }
-    puts data.to_json()
-    puts HTTParty.post(url, :headers => headers, :body => data.to_json()).parsed_response
-  end
-
-  def Api.getChanId server, port, userId, authToken, room
-    url = Api.getUrl server, port, "channels.info?roomName=#{room}"
-    headers = Api.getHeaders userId, authToken
-    HTTParty.get(url, :headers => headers).parsed_response["channel"]["_id"]
-  end
-
-  def Api.getChanMessage server, port, userId, authToken, room
-    chanId = Api.getChanId server, port, userId, authToken, room
-    url = Api.getUrl server, port, "channels.history?roomId=#{chanId}&count=1"
-    headers = Api.getHeaders userId, authToken
-    resp = HTTParty.get(url, :headers => headers).parsed_response
-    [resp["messages"][0]["u"]["username"], resp["messages"][0]["msg"]]
+    HTTParty.post(url, :headers => headers, :body => data.to_json())
   end
 
   def Api.listDirectMessages server, port, userId, authToken
@@ -97,7 +82,6 @@ module Api
     for im in resp["ims"]
       ids.push im["_id"]
     end
-    puts "Ids #{ids}"
     ids
   end
 
@@ -106,11 +90,9 @@ module Api
     headers = Api.getHeaders userId, authToken
     resp = HTTParty.get(url, :headers => headers).parsed_response
     names = []
-    puts resp
     for member in resp["members"]
       names.push member["username"]
     end
-    puts "Names #{names}"
     names
   end
 
@@ -119,7 +101,6 @@ module Api
     headers = Api.getHeaders userId, authToken
     data = {:username => user}
     resp = HTTParty.post(url, :headers => headers, :body => data.to_json()).parsed_response
-    puts "roomId #{resp}"
     resp["room"]["_id"]
   end
 
@@ -127,7 +108,7 @@ module Api
     url = Api.getUrl server, port, "chat.postMessage"
     headers = Api.getHeaders userId, authToken
     data = {:roomId => room, :text => msg}
-    puts HTTParty.post(url, :headers => headers, :body => data.to_json()).parsed_response
+    HTTParty.post(url, :headers => headers, :body => data.to_json())
   end
 
   def Api.directMessage server, port, userId, authToken, user, msg
@@ -143,7 +124,6 @@ module Api
     if room == nil
       room = Api.createDirectMessage server, port, userId, authToken, user
     end
-    puts "in"
     Api.sendMessage server, port, userId, authToken, room, msg
   end
 
