@@ -75,7 +75,6 @@ get "/update" do
 end
 
 post "/taco" do
-  puts request
   req= JSON.parse(request.body.read)
   user, msg = req["user_name"], req["text"]
   quant = 0
@@ -96,6 +95,15 @@ post "/taco" do
     Api.directMessage $server, $port, $userId, $authToken, user, "You have successfully given #{quant} tacos to #{users.join(', ')}!"
   else
     Api.directMessage $server, $port, $userId, $authToken, user, "You don't have enough tacos to give #{quant} taco(s) to #{users.join(', ')}"
+  end
+end
+
+post "/command" do
+  req= JSON.parse(request.body.read)
+  user, msg, channel = req["user_name"], req["text"], req["channel_id"]
+  if msg.include? "tacos"
+    tacos = Db.getTacos db, user
+    Api.sendMessage $server, $port, $userId, $authToken, channel, "You have #{tacos} tacos"
   end
 end
 

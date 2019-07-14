@@ -59,4 +59,9 @@ module Db
     false
   end
 
+  def Db.getTacos db, user
+    Db.ensureDatumExists db, "tacos", "user", user, ["'#{user}'", 5]
+    db.execute("select amount from tacos where user = '#{user}'")[0][0]
+  end
+
 end
