@@ -1,3 +1,4 @@
+require 'date'
 require 'sqlite3'
 
 module Db
@@ -62,6 +63,14 @@ module Db
   def Db.getTacos db, user
     Db.ensureDatumExists db, "tacos", "user", user, ["'#{user}'", 5]
     db.execute("select amount from tacos where user = '#{user}'")[0][0]
+  end
+
+  def Db.getLeaderBoard db, channel, timeframe
+    current_date = DateTime.now.amjd().to_f
+    oldest_date = current_date - timeframe
+    recv = db.execute "select receiver, sum(amount) as total from #{channel} group by receiver order by total desc limit 10"
+    givers = db.execute "select giver, sum(amount) as total from #{channel} group by giver order by total desc limit 10"
+    [recv, givers]
   end
 
 end

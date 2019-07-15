@@ -121,8 +121,42 @@ post "/command" do
            - !leaderboard - display highest taco givers and receivers
            - !help - display this message
     )
-    puts help
     Api.sendMessage $server, $port, $userId, $authToken, channel, help
+  end
+  if msg.include? "!leaderboard"
+    timeframes = {"day" => 1, "week" => 7, "month" => 30, "year" => 365}
+    timeframe = 36500
+    timeframe_name = "century"
+    chan = "general"
+    for word in msg.split " "
+      if timeframes.include? word
+        timeframe = timeframes[word]
+        timeframe_name = word
+      end
+      if $channel_stat.include? word.sub("#", "")
+        chan = word.sub("#", "")
+      end
+    end
+    rlb, glb = Db.getLeaderBoard db, chan, timeframe
+    text = "*Leaderboard for ##{chan} this #{timeframe_name}:*\n*Most Tacos Recieved*\n"
+    place = 1
+    if rlb.length == 0
+      text += "No Tacos Received\n"
+    end
+    for elem in rlb
+      text += "#{place}. #{elem[0]}: #{elem[1]}\n"
+      place += 1
+    end
+    text += "*Most Tacos Given*\n"
+    place = 1
+    if glb.length == 0
+      text += "No Tacos Given\n"
+    end
+    for elem in glb
+      text += "#{place}. #{elem[0]}: #{elem[1]}\n"
+      place += 1
+    end
+    puts Api.sendMessage $server, $port, $userId, $authToken, channel, text
   end
 end
 
