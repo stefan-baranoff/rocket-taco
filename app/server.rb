@@ -93,8 +93,9 @@ post "/taco" do
     end
   end
   reason = reason.join " "
-  if Db.insertTaco db, params[:channel], user, users, quant, reason
-    puts "#{user} gave #{quant} tacos to #{users} for reason: #{reason} on channel #{params[:channel]}"
+  if users.include? user
+    Api.directMessage $server, $port, $userId, $authToken, user, "You cannot give tacos to yourself."
+  elsif Db.insertTaco db, params[:channel], user, users, quant, reason
     Api.directMessage $server, $port, $userId, $authToken, user, "You have successfully given #{quant} tacos to #{users.join(', ')}!"
   else
     Api.directMessage $server, $port, $userId, $authToken, user, "You don't have enough tacos to give #{quant} taco(s) to #{users.join(', ')}"
