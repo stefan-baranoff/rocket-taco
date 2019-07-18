@@ -65,12 +65,60 @@ module Db
     db.execute("select amount from tacos where user = '#{user}'")[0][0]
   end
 
+  $leaderboard_query = %q(
+    select %{user_type}, sum(amount) as total
+    from %{channel}
+    where time > %{oldest_date}
+    group by %{user_type}
+    order by total desc
+    %{limit}
+  )
+
   def Db.getLeaderBoard db, channel, timeframe
     current_date = DateTime.now.amjd().to_f
     oldest_date = current_date - timeframe
-    recv = db.execute "select receiver, sum(amount) as total from #{channel} group by receiver order by total desc limit 10"
-    givers = db.execute "select giver, sum(amount) as total from #{channel} group by giver order by total desc limit 10"
+    puts $leaderboard_query % {
+      "user_type": "receiver",
+      "channel": "'#{channel}'",
+      "oldest_date": oldest_date,
+      "limit": "limit 10"
+    }
+    recv = db.execute(
+      $leaderboard_query % {
+        "user_type": "receiver",
+        "channel": "'#{channel}'",
+        "oldest_date": oldest_date,
+        "limit": "limit 10"
+      }
+    )
+    givers = db.execute(
+      $leaderboard_query % {
+        "user_type": "giver",
+        "channel": "'#{channel}'",
+        "oldest_date": oldest_date,
+        "limit": "limit 10"
+      }
+    )
     [recv, givers]
+  end
+
+  def Db.getUserStats db, channel, timeframe, user, type
+    current_date = DateTime.now.amjd().to_f
+    oldest_date = current_date - timeframe
+    query = $leaderboard_query % {
+      "user_type": "#{type}",
+      "channel": "'#{channel}'",
+      "oldest_date": oldest_date,
+      "limit": ""
+    }
+    count = 1
+    for row in db.execute query
+      if row[0] == user
+        return [count, row[1]]
+      end
+      count += 1
+    end
+    nil
   end
 
 end

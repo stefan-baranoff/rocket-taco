@@ -138,7 +138,7 @@ post "/command" do
       end
     end
     rlb, glb = Db.getLeaderBoard db, chan, timeframe
-    text = "*Leaderboard for ##{chan} this #{timeframe_name}:*\n*Most Tacos Recieved*\n"
+    text = "*Leaderboard for ##{chan} this #{timeframe_name}:*\n*Most Tacos Received*\n"
     place = 1
     if rlb.length == 0
       text += "No Tacos Received\n"
@@ -155,6 +155,19 @@ post "/command" do
     for elem in glb
       text += "#{place}. #{elem[0]}: #{elem[1]}\n"
       place += 1
+    end
+    text += "*Your Stats*\n"
+    recv_stats = Db.getUserStats db, chan, timeframe, user, "receiver"
+    give_stats = Db.getUserStats db, chan, timeframe, user, "giver"
+    if recv_stats == nil
+      text += "No Tacos Received\n"
+    else
+      text += "Received #{recv_stats[1]} tacos, place #{recv_stats[0]} on leaderboard\n"
+    end
+    if give_stats == nil
+      text += "No Tacos Given\n"
+    else
+      text += "Gave #{give_stats[1]} tacos, place #{give_stats[0]} on leaderboard"
     end
     puts Api.sendMessage $server, $port, $userId, $authToken, channel, text
   end
