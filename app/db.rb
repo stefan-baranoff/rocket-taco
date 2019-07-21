@@ -41,6 +41,7 @@ module Db
       Db.ensureDatumExists db, "settings", "key", "username", ["'username'", "'rocket_chat'"]
       Db.ensureDatumExists db, "settings", "key", "password", ["'password'", "'taco'"]
       Db.ensureTableExists db, "tacos", ['user', 'amount'], ['string', 'int']
+      Db.ensureTableExists db, "GLOBAL", ['time', 'giver', 'receiver', 'amount', 'reason'], ['real', 'string', 'string', 'int', 'string']
       for chan in channels
         Db.ensureTableExists db, chan[0], ['time', 'giver', 'receiver', 'amount', 'reason'], ['real', 'string', 'string', 'int', 'string']
       end
@@ -53,6 +54,7 @@ module Db
     if tacos_left >= quant * receiver.length
       for recv in receiver
         db.execute "insert into #{chan} values (julianday('now'), '#{giver}', '#{recv}', #{quant}, '#{reason}');"
+        db.execute "insert into GLOBAL values (julianday('now'), '#{giver}', '#{recv}', #{quant}, '#{reason}');"
       end
       db.execute "update tacos set amount = #{tacos_left - quant * receiver.length} where user = '#{giver}'"
       return true

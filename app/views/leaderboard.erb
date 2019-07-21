@@ -37,6 +37,7 @@
       </tr>
       <tr>
         <td>Channel: <td><select name=channel>
+        <option value=GLOBAL>#GLOBAL</option>
         <% for chan in channels %>
           <%= "<option value=#{chan}>##{chan}</option>" %>
         <% end %>

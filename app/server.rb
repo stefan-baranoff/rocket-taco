@@ -71,7 +71,7 @@ get "/update" do
   $user = params[:user]
   $password = params[:password]
   if params[:channels]
-    Api.addCreateInt $server, $port, $user, $userId, $authToken, params[:channels]
+    Api.addChannelInt $server, $port, $user, $userId, $authToken, params[:channels]
   end
   update $server, $port, $user, $password
   redirect "/"
@@ -128,7 +128,7 @@ post "/command" do
     timeframes = {"day" => 1, "week" => 7, "month" => 30, "year" => 365}
     timeframe = 36500
     timeframe_name = "century"
-    chan = "general"
+    chan = "GLOBAL"
     for word in msg.split " "
       if timeframes.include? word
         timeframe = timeframes[word]
@@ -176,7 +176,7 @@ post "/command" do
 end
 
 get "/leaderboard" do
-  chan = params[:channel] ? params[:channel] : "general"
+  chan = params[:channel] ? params[:channel] : "GLOBAL"
   timeframes = {"day" => 1, "week" => 7, "month" => 30, "year" => 365, "century" => 36500}
   timeframe = params[:timeframe] ? params[:timeframe] : "year"
   length = timeframes[timeframe]
