@@ -1,0 +1,51 @@
+<html>
+<head>
+  <title> Rocket Taco Leaderboard </title>
+</head>
+<body>
+  <center>
+    <h1 style="font-family: arial"> Leaderboard for #<%= channel %> this <%= timeframe %></h1>
+    <hr/>
+    <h2 style="font-family: arial"> Most Tacos Received </h2>
+    <table border=1 style="border-collapse: collapse" width=50%>
+      <tr><td>Rank</td><td>Name</td><td>Amount</td></tr>
+      <% count = 1 %>
+      <% for row in rlb %>
+        <%= "<tr><td>#{count}</td><td>#{row[0]}</td><td>#{row[1]}</td></tr>" %>
+        <% count += 1 %>
+      <% end %>
+    </table>
+    <h2 style="font-family: arial"> Most Tacos Given </h2>
+    <table border=1 style="border-collapse: collapse" width=50%>
+      <tr><td>Rank</td><td>Name</td><td>Amount</td></tr>
+      <% count = 1 %>
+      <% for row in glb %>
+        <%= "<tr><td>#{count}</td><td>#{row[0]}</td><td>#{row[1]}</td></tr>" %>
+        <% count += 1 %>
+      <% end %>
+    </table>
+    <br/><br/>
+    <form method=GET action=/leaderboard target="_self">
+      <table>
+      <tr>
+        <td>Timeframe:</td> <td><select name=timeframe>
+        <option value="day">day</option>
+        <option value="week">week</option>
+        <option value="month">month</option>
+        <option value="year">year</option>
+        <option value="century">century</option></td>
+      </tr>
+      <tr>
+        <td>Channel: <td><select name=channel>
+        <% for chan in channels %>
+          <%= "<option value=#{chan}>##{chan}</option>" %>
+        <% end %>
+      </tr>
+      <tr>
+        <td colspan=2><center><button type=submit>Refresh</button></center></td>
+      </tr>
+      </select>
+    </form>
+  </center>
+</body>
+</html>

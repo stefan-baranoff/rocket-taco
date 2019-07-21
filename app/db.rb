@@ -74,21 +74,15 @@ module Db
     %{limit}
   )
 
-  def Db.getLeaderBoard db, channel, timeframe
+  def Db.getLeaderBoard db, channel, timeframe, limit
     current_date = DateTime.now.amjd().to_f
     oldest_date = current_date - timeframe
-    puts $leaderboard_query % {
-      "user_type": "receiver",
-      "channel": "'#{channel}'",
-      "oldest_date": oldest_date,
-      "limit": "limit 10"
-    }
     recv = db.execute(
       $leaderboard_query % {
         "user_type": "receiver",
         "channel": "'#{channel}'",
         "oldest_date": oldest_date,
-        "limit": "limit 10"
+        "limit":  limit ? "limit 10" : ""
       }
     )
     givers = db.execute(
@@ -96,7 +90,7 @@ module Db
         "user_type": "giver",
         "channel": "'#{channel}'",
         "oldest_date": oldest_date,
-        "limit": "limit 10"
+        "limit": limit ? "limit 10" : ""
       }
     )
     [recv, givers]

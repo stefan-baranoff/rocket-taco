@@ -138,7 +138,7 @@ post "/command" do
         chan = word.sub("#", "")
       end
     end
-    rlb, glb = Db.getLeaderBoard db, chan, timeframe
+    rlb, glb = Db.getLeaderBoard db, chan, timeframe, true
     text = "*Leaderboard for ##{chan} this #{timeframe_name}:*\n*Most Tacos Received*\n"
     place = 1
     if rlb.length == 0
@@ -168,10 +168,33 @@ post "/command" do
     if give_stats == nil
       text += "No Tacos Given\n"
     else
-      text += "Gave #{give_stats[1]} tacos, place #{give_stats[0]} on leaderboard"
+      text += "Gave #{give_stats[1]} tacos, place #{give_stats[0]} on leaderboard\n"
     end
+    text += "\nFull Leaderboard: http://localhost:4567/leaderboard?timeframe=#{timeframe_name}&channel=#{chan}"
     puts Api.sendMessage $server, $port, $userId, $authToken, channel, text
   end
+end
+
+get "/leaderboard" do
+  chan = params[:channel] ? params[:channel] : "general"
+  timeframes = {"day" => 1, "week" => 7, "month" => 30, "year" => 365, "century" => 36500}
+  timeframe = params[:timeframe] ? params[:timeframe] : "year"
+  length = timeframes[timeframe]
+  rlb, glb = Db.getLeaderBoard db, chan, length, false
+  channels = []
+  for channel in $channel_stat.keys()
+    if $channel_stat[channel] == "Connected"
+      channels.push channel
+    end
+  end
+  locals = {
+    :channel => chan,
+    :channels => channels,
+    :timeframe => timeframe,
+    :rlb => rlb,
+    :glb => glb
+  }
+  erb :leaderboard, :locals => locals
 end
 
 get "/icon.png" do
