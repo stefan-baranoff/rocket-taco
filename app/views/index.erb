@@ -1,59 +1,72 @@
 <html>
   <head>
     <title> Rocket Taco Control Panel </title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   </head>
   <body>
     <table>
       <tr>
         <td><img src=/icon.png width=40 height=40><td>
-        <td><center><h1 style="font-family: arial" align=center> Rocket Taco Control Panel </h1></center></td>
+        <td><center><h2> Rocket Taco Control Panel </h2></center></td>
       </tr>
     </table>
     <hr/>
 
-    <h2 style="font-family:arial"> Status </h2>
-    <form> <font id=status color=<%= {"Not Connected" => "#ff0000", "Connected" => "#00ff00"}[status] %> > <%= status  %> </font>
-       <button type=submit> Refresh </button> </form>
+    <h3> Status <span class='<%= {"Not Connected" => "badge badge-danger", "Connected" => "badge badge-success"}[status] %>' > <%= status  %> </span> </h3>
 
-    <h2 style="font-family:arial"> Settings </h2>
+    <h3> Settings </h3>
     <form method=GET action=/update>
       <table style="width: 600px" border=0>
         <tr>
           <td> Bot IP or FQDN </td>
-          <td> http:// <input name=host value=<%= host %> size=13 /> </td>
+          <td>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">http://</span>
+              </div>
+              <input type="text" class="form-control" name=host value=<%= host %> size=13>
+            </td>
+          </td>
         </tr>
         <tr>
           <td> Bot Port </td>
-          <td> <input name=host_port value=<%= host_port %> /> </td>
+          <td><div class="input-group mb-3"> <input class="form-control" name=host_port value=<%= host_port %> /> </div> </td>
         </tr>
         <tr>
-          <td> Rocket.Chat Server: </td>
-          <td> http:// <input name=server value=<%= server %> size=13 /> </td>
+          <td> Rocket.Chat Server </td>
+          <td>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">http://</span>
+              </div>
+              <input type="text" class="form-control" name=server value=<%= server %> size=13>
+            </td>
+          </td>
         </tr>
         <tr>
-          <td> Rocket.Chat Port: </td>
-          <td> <input name=port value=<%= port %> > </td>
+          <td> Rocket.Chat Port </td>
+          <td><div class="input-group mb-3"> <input class="form-control" name=port value=<%= port %> > </div></td>
         </tr>
         <tr>
-          <td> Rocket Taco Username: </td>
-          <td> <input name=user value=<%= user %>> </td>
+          <td> Rocket Taco Username </td>
+          <td> <div class="input-group mb-3"><input class="form-control" name=user value=<%= user %>> </div></td>
         </tr>
         <tr>
-          <td> Rocket Taco Password: </td>
-          <td> <input name=password value=<%= password %>> </td>
+          <td> Rocket Taco Password </td>
+          <td><div class="input-group mb-3"> <input class="form-control" type=password name=password value=<%= password %>> </div></td>
         </tr>
       </table>
 
-      <h2 style="font-family:arial"> Channels </h2>
-      <table style="width: 600px" border=0>
+      <h3> Channels </h3>
+      <table style="width: 650px" border=0>
         <% for channel in channels %>
           <%= "<tr>" %>
             <%= "<td> # #{channel[0]} </td>" %>
-            <%= "<td> <font color=#{{"Not Connected" => "#ff0000", "Connected" => "#00ff00"}[channel_stat[channel[0]]]}> <input name=channels value=#{channel[0]} type=checkbox> #{channel_stat[channel[0]]} </font> </td>" %>
+            <%= "<td> <input name=channels value=#{channel[0]} type=radio> <span class='#{{"Connected" => "badge badge-success", "Not Connected" => "badge badge-danger"}[channel_stat[channel[0]]]}'> #{channel_stat[channel[0]]} </span> </td>" %>
           <%= "</tr>" %>
         <% end %>
         <tr>
-          <td colspan=2> <br/><center> <button type=submit> Update </button> </center> </td>
+          <td colspan=2> <br/><center> <button class="btn btn-primary" type=submit> Update </button> </center> </td>
         </tr>
       </table>
     </form>
