@@ -1,51 +1,52 @@
 <html>
 <head>
   <title> Rocket Taco Leaderboard </title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
   <center>
-    <h1 style="font-family: arial"> Leaderboard for #<%= channel %> this <%= timeframe %></h1>
+    <h2>Leaderboard for #<%= channel %> this <%= timeframe %></h2>
     <hr/>
-    <h2 style="font-family: arial"> Most Tacos Received </h2>
-    <table border=1 style="border-collapse: collapse" width=50%>
-      <tr><td>Rank</td><td>Name</td><td>Amount</td></tr>
-      <% count = 1 %>
-      <% for row in rlb %>
-        <%= "<tr><td>#{count}</td><td>#{row[0]}</td><td>#{row[1]}</td></tr>" %>
-        <% count += 1 %>
-      <% end %>
+    <h3> Most Tacos Received </h3>
+    <table  class="table table-striped table-sm" style="width: 50%">
+      <thead><th scope=col>Rank</th><th scope=col>Name</th><th scope=col>Amount</th></thead>
+      <tbody>
+        <% count = 1 %>
+        <% for row in rlb %>
+          <%= "<tr><th scope=row>#{count}</th><td>#{row[0]}</td><td>#{row[1]}</td></tr>" %>
+          <% count += 1 %>
+        <% end %>
+      </tbody>
     </table>
-    <h2 style="font-family: arial"> Most Tacos Given </h2>
-    <table border=1 style="border-collapse: collapse" width=50%>
-      <tr><td>Rank</td><td>Name</td><td>Amount</td></tr>
-      <% count = 1 %>
-      <% for row in glb %>
-        <%= "<tr><td>#{count}</td><td>#{row[0]}</td><td>#{row[1]}</td></tr>" %>
-        <% count += 1 %>
-      <% end %>
+    <h3> Most Tacos Given </h3>
+    <table  class="table table-striped table-sm" style="width: 50%">
+      <thead><th scope=col>Rank</th><th scope=col>Name</th><th scope=col>Amount</th></thead>
+      <tbody>
+        <% count = 1 %>
+        <% for row in glb %>
+          <%= "<tr><th scope=row>#{count}</th><td>#{row[0]}</td><td>#{row[1]}</td></tr>" %>
+          <% count += 1 %>
+        <% end %>
+      </tbody>
     </table>
     <br/><br/>
     <form method=GET action=/leaderboard target="_self">
       <table>
       <tr>
-        <td>Timeframe:</td> <td><select name=timeframe>
+        <td><select name=timeframe class="form-control">
         <option value="day">day</option>
         <option value="week">week</option>
         <option value="month">month</option>
         <option value="year">year</option>
         <option value="century">century</option></td>
-      </tr>
-      <tr>
-        <td>Channel: <td><select name=channel>
+        <td><select name=channel class="form-control">
         <option value=GLOBAL>#GLOBAL</option>
         <% for chan in channels %>
           <%= "<option value=#{chan}>##{chan}</option>" %>
         <% end %>
+      </select></td>
+        <td><center><button type=submit class="btn btn-primary">Refresh</button></center></td>
       </tr>
-      <tr>
-        <td colspan=2><center><button type=submit>Refresh</button></center></td>
-      </tr>
-      </select>
     </form>
   </center>
 </body>

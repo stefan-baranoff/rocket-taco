@@ -19,11 +19,19 @@
     <form method=GET action=/update>
       <table style="width: 600px" border=0>
         <tr>
-          <td> Server: </td>
+          <td> Bot IP or FQDN </td>
+          <td> http:// <input name=host value=<%= host %> size=13 /> </td>
+        </tr>
+        <tr>
+          <td> Bot Port </td>
+          <td> <input name=host_port value=<%= host_port %> /> </td>
+        </tr>
+        <tr>
+          <td> Rocket.Chat Server: </td>
           <td> http:// <input name=server value=<%= server %> size=13 /> </td>
         </tr>
         <tr>
-          <td> Port: </td>
+          <td> Rocket.Chat Port: </td>
           <td> <input name=port value=<%= port %> > </td>
         </tr>
         <tr>
