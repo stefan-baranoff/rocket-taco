@@ -63,14 +63,27 @@ module Api
     HTTParty.post(url, :headers => headers, :body => data.to_json())
   end
 
-  def Api.addChannelInt server, port, user, userId, authToken, channel
+  def Api.removeChannelInt server, port, userId, authToken, channel
+    url = Api.getUrl server, port, "integrations.remove"
+    headers = Api.getHeaders userId, authToken
+    for int in Api.listInt(server, port, userId, authToken)
+      puts int.inspect
+      puts channel
+      if int[0] == "Rocket Taco for #{channel}"
+        data = {:type=>"webhook-outgoing", :integrationId=>int[1]}
+        HTTParty.post(url, :headers => headers, :body => data.to_json())
+      end
+    end
+  end
+
+  def Api.addChannelInt server, port, user, userId, authToken, channel, host, host_port
     data = {
       :type => "webhook-outgoing",
       :name => "Rocket Taco for #{channel}",
       :enabled => true,
       :event => "sendMessage",
       :username => user,
-      :urls => ["http://localhost:4567/taco?channel=#{channel}"],
+      :urls => ["http://#{host}:#{host_port}/taco?channel=#{channel}"],
       :triggerWords => [":taco:"],
       :channel => "##{channel}",
       :scriptEnabled => false
@@ -78,14 +91,14 @@ module Api
     Api.addInt server, port, user, userId, authToken, data
   end
 
-  def Api.addGlobalInt server, port, user, userId, authToken
+  def Api.addGlobalInt server, port, user, userId, authToken, host, host_port
     data = {
       :type => "webhook-outgoing",
       :name => "Rocket Taco Global",
       :enabled => true,
       :event => "sendMessage",
       :username => user,
-      :urls => ["http://localhost:4567/command"],
+      :urls => ["http://#{host}:#{host_port}/command"],
       :channel => "@#{user}",
       :scriptEnabled => false
     }
@@ -145,10 +158,10 @@ module Api
     Api.sendMessage server, port, userId, authToken, room, msg
   end
 
-  def Api.setAvatar server, port, userId, authToken
+  def Api.setAvatar server, port, userId, authToken, host, host_port
     url = Api.getUrl server, port, "users.setAvatar"
     headers = Api.getHeaders userId, authToken
-    data = {:avatarUrl => "http://localhost:4567/icon.png"}
+    data = {:avatarUrl => "http://#{host}:#{host_port}/icon.png"}
     puts HTTParty.post(url, :headers => headers, :body => data.to_json()).parsed_response
   end
 

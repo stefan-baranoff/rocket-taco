@@ -6,6 +6,8 @@ require_relative 'db'
 
 set :bind => "0.0.0.0"
 
+$host = "localhost"
+$host_port = 4567
 $server = "localhost"
 $port = 3000
 $user = "rocket_taco"
@@ -43,9 +45,9 @@ def update server, port, user, password
       end
     end
     if global_int == false
-      Api.addGlobalInt $server, $port, $user, $userId, $authToken
+      Api.addGlobalInt $server, $port, $user, $userId, $authToken,  $host, $host_port
     end
-    Api.setAvatar $server, $port, $userId, $authToken
+    Api.setAvatar $server, $port, $userId, $authToken, $host, $host_port
   end
 end
 
@@ -60,18 +62,32 @@ get "/" do
     :password=>$password,
     :status=>$status,
     :channels=>$channels,
-    :channel_stat=>$channel_stat
+    :channel_stat=>$channel_stat,
+    :host=>$host,
+    :host_port=>$host_port
   }
   erb :index, :locals => locals
 end
 
 get "/update" do
+  host_changed = ($host != params[:host]) || ($host_port) != (params[:host_port])
+  $host = params[:host]
+  $host_port = params[:host_port]
   $server = params[:server]
   $port = params[:port]
   $user = params[:user]
   $password = params[:password]
   if params[:channels]
-    Api.addChannelInt $server, $port, $user, $userId, $authToken, params[:channels]
+    Api.removeChannelInt $server, $port, $userId, $authToken, params[:channels]
+    Api.addChannelInt $server, $port, $user, $userId, $authToken, params[:channels], $host, $host_port
+  end
+  if host_changed
+    for channel in $channel_stat.keys()
+      if ($channel_stat[channel] == "Connected")
+        Api.removeChannelInt $server, $port, $userId, $authToken, channel
+        Api.addChannelInt $server, $port, $user, $userId, $authToken, channel, $host, $host_port
+      end
+    end
   end
   update $server, $port, $user, $password
   redirect "/"
@@ -170,7 +186,7 @@ post "/command" do
     else
       text += "Gave #{give_stats[1]} tacos, place #{give_stats[0]} on leaderboard\n"
     end
-    text += "\nFull Leaderboard: http://localhost:4567/leaderboard?timeframe=#{timeframe_name}&channel=#{chan}"
+    text += "\nFull Leaderboard: http://#{$host}:#{$host_port}/leaderboard?timeframe=#{timeframe_name}&channel=#{chan}"
     puts Api.sendMessage $server, $port, $userId, $authToken, channel, text
   end
 end
