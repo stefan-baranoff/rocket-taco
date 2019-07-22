@@ -36,9 +36,11 @@ module Db
   def Db.init channels
       db = Db.open
       Db.ensureTableExists db, "settings", ["key", "value"], ["string", "string"]
+      Db.ensureDatumExists db, "settings", "key", "host", ["'host'", "'localhost'"]
+      Db.ensureDatumExists db, "settings", "key", "host_port", ["'host_port'", "'4567'"]
       Db.ensureDatumExists db, "settings", "key", "server", ["'server'", "'localhost'"]
       Db.ensureDatumExists db, "settings", "key", "port", ["'port'", "'3000'"]
-      Db.ensureDatumExists db, "settings", "key", "username", ["'username'", "'rocket_chat'"]
+      Db.ensureDatumExists db, "settings", "key", "username", ["'username'", "'rocket_taco'"]
       Db.ensureDatumExists db, "settings", "key", "password", ["'password'", "'taco'"]
       Db.ensureTableExists db, "tacos", ['user', 'amount'], ['string', 'int']
       Db.ensureTableExists db, "GLOBAL", ['time', 'giver', 'receiver', 'amount', 'reason'], ['real', 'string', 'string', 'int', 'string']
@@ -46,6 +48,23 @@ module Db
         Db.ensureTableExists db, chan[0], ['time', 'giver', 'receiver', 'amount', 'reason'], ['real', 'string', 'string', 'int', 'string']
       end
       db
+  end
+
+  def Db.loadSettings db
+    settings = {}
+    for setting in db.execute "select * from settings"
+      settings[setting[0]] = setting[1]
+    end
+    [settings["host"],settings["host_port"].to_i(),settings["server"],settings["port"].to_i(),settings["username"],settings["password"]]
+  end
+
+  def Db.saveSettings db, host, host_port, server, port, user, password
+    db.execute "update settings set value = '#{host}' where key = 'host'"
+    db.execute "update settings set value = '#{host_port}' where key = 'host_port'"
+    db.execute "update settings set value = '#{server}' where key = 'server'"
+    db.execute "update settings set value = '#{port}' where key = 'port'"
+    db.execute "update settings set value = '#{user}' where key = 'user'"
+    db.execute "update settings set value = '#{password}' where key = 'password'"
   end
 
   def Db.insertTaco db, chan, giver, receiver, quant, reason

@@ -6,12 +6,9 @@ require_relative 'db'
 
 set :bind => "0.0.0.0"
 
-$host = "localhost"
-$host_port = 4567
-$server = "localhost"
-$port = 3000
-$user = "rocket_taco"
-$password = "taco"
+db = Db.init []
+$host, $host_port, $server, $port, $user, $password = Db.loadSettings db
+
 $channels = []
 $ints = []
 $channel_stat = {}
@@ -77,6 +74,7 @@ get "/update" do
   $port = params[:port]
   $user = params[:user]
   $password = params[:password]
+  Db.saveSettings db, $host, $host_port, $server, $port, $user, $password
   if params[:channels]
     Api.removeChannelInt $server, $port, $userId, $authToken, params[:channels]
     Api.addChannelInt $server, $port, $user, $userId, $authToken, params[:channels], $host, $host_port
