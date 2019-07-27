@@ -110,7 +110,10 @@ post "/taco" do
   if users.include? user
     Api.directMessage $server, $port, $userId, $authToken, user, "You cannot give tacos to yourself."
   elsif Db.insertTaco db, params[:channel], user, users, quant, reason
-    Api.directMessage $server, $port, $userId, $authToken, user, "You have successfully given #{quant} tacos to #{users.join(', ')}!"
+    Api.directMessage $server, $port, $userId, $authToken, user, "You have successfully given #{quant} tacos to @#{users.join(', @')}!"
+    for receiver in users
+      Api.directMessage $server, $port, $userId, $authToken, receiver, "You have received #{quant} tacos from @#{user}!"
+    end
   else
     Api.directMessage $server, $port, $userId, $authToken, user, "You don't have enough tacos to give #{quant} taco(s) to #{users.join(', ')}"
   end
