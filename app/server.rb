@@ -14,6 +14,7 @@ $ints = []
 $channel_stat = {}
 $userId = ""
 $authToken = ""
+$urlToken = Api.genToken()
 
 def login server, port, user, password
   u, a = Api.login server, port, user, password
@@ -39,6 +40,12 @@ def update server, port, user, password
           global_int = true
         end
         $channel_stat[int[2][0][1..-1]] = "Connected"
+      end
+    end
+    for channel in $channel_stat.keys()
+      if ($channel_stat[channel] == "Connected")
+        Api.removeChannelInt $server, $port, $userId, $authToken, channel
+        Api.addChannelInt $server, $port, $user, $userId, $authToken, channel, $host, $host_port, $urlToken
       end
     end
     if global_int == false
@@ -77,21 +84,16 @@ get "/update" do
   Db.saveSettings db, $host, $host_port, $server, $port, $user, $password
   if params[:channels]
     Api.removeChannelInt $server, $port, $userId, $authToken, params[:channels]
-    Api.addChannelInt $server, $port, $user, $userId, $authToken, params[:channels], $host, $host_port
-  end
-  if host_changed
-    for channel in $channel_stat.keys()
-      if ($channel_stat[channel] == "Connected")
-        Api.removeChannelInt $server, $port, $userId, $authToken, channel
-        Api.addChannelInt $server, $port, $user, $userId, $authToken, channel, $host, $host_port
-      end
-    end
+    Api.addChannelInt $server, $port, $user, $userId, $authToken, params[:channels], $host, $host_port, $urlToken
   end
   update $server, $port, $user, $password
   redirect "/"
 end
 
 post "/taco" do
+  if params[:p] != $urlToken
+    return
+  end
   req= JSON.parse(request.body.read)
   user, msg = req["user_name"], req["text"]
   quant = 0

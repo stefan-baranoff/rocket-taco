@@ -2,6 +2,15 @@ require 'httparty'
 
 module Api
 
+  def Api.genToken()
+    letters = '0123456789ABCDEF'
+    token = ""
+    for i in 0..100
+      token += letters[rand(16)]
+    end
+    token
+  end
+
   def Api.getUrl server, port, endpoint
     "http://%s:%d/api/v1/%s" % [server, port, endpoint]
   end
@@ -67,8 +76,6 @@ module Api
     url = Api.getUrl server, port, "integrations.remove"
     headers = Api.getHeaders userId, authToken
     for int in Api.listInt(server, port, userId, authToken)
-      puts int.inspect
-      puts channel
       if int[0] == "Rocket Taco for #{channel}"
         data = {:type=>"webhook-outgoing", :integrationId=>int[1]}
         HTTParty.post(url, :headers => headers, :body => data.to_json())
@@ -76,14 +83,14 @@ module Api
     end
   end
 
-  def Api.addChannelInt server, port, user, userId, authToken, channel, host, host_port
+  def Api.addChannelInt server, port, user, userId, authToken, channel, host, host_port, urlToken
     data = {
       :type => "webhook-outgoing",
       :name => "Rocket Taco for #{channel}",
       :enabled => true,
       :event => "sendMessage",
       :username => user,
-      :urls => ["http://#{host}:#{host_port}/taco?channel=#{channel}"],
+      :urls => ["http://#{host}:#{host_port}/taco?channel=#{channel}&p=#{urlToken}"],
       :triggerWords => [":taco:"],
       :channel => "##{channel}",
       :scriptEnabled => false
