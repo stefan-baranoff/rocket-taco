@@ -1,3 +1,4 @@
+require "digest"
 require "json"
 require "sinatra"
 
@@ -91,11 +92,11 @@ get "/update" do
 end
 
 post "/taco" do
-  if params[:p] != $urlToken
+  req= JSON.parse(request.body.read)
+  user, msg, channel = req["user_name"], req["text"], req["channel_name"]
+  if params[:p] != Digest::MD5.hexdigest($urlToken + msg + Time.now.to_i.to_s)
     return
   end
-  req= JSON.parse(request.body.read)
-  user, msg = req["user_name"], req["text"]
   quant = 0
   users = []
   reason = []
@@ -111,7 +112,7 @@ post "/taco" do
   reason = reason.join " "
   if users.include? user
     Api.directMessage $server, $port, $userId, $authToken, user, "You cannot give tacos to yourself."
-  elsif Db.insertTaco db, params[:channel], user, users, quant, reason
+  elsif Db.insertTaco db, channel, user, users, quant, reason
     Api.directMessage $server, $port, $userId, $authToken, user, "You have successfully given #{quant} tacos to @#{users.join(', @')}!"
     for receiver in users
       Api.directMessage $server, $port, $userId, $authToken, receiver, "You have received #{quant} tacos from @#{user}!"

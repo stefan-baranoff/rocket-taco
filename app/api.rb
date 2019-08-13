@@ -5,7 +5,7 @@ module Api
   def Api.genToken()
     letters = '0123456789ABCDEF'
     token = ""
-    for i in 0..100
+    for i in 0..32
       token += letters[rand(16)]
     end
     token
@@ -61,7 +61,9 @@ module Api
     resp = HTTParty.get(url, :headers => headers)
     names = []
     for int in resp.parsed_response["integrations"]
-      names.push([int["name"], int["_id"], int["channel"]])
+      if int.include?("name") && int.include?("_id") && int.include?("channel")
+        names.push([int["name"], int["_id"], int["channel"]])
+      end
     end
     names
   end
@@ -84,16 +86,18 @@ module Api
   end
 
   def Api.addChannelInt server, port, user, userId, authToken, channel, host, host_port, urlToken
+    script = File.open("scripts/rocketchat_rest.js", "r").read
     data = {
       :type => "webhook-outgoing",
       :name => "Rocket Taco for #{channel}",
       :enabled => true,
       :event => "sendMessage",
       :username => user,
-      :urls => ["http://#{host}:#{host_port}/taco?channel=#{channel}&p=#{urlToken}"],
+      :urls => ["http://#{host}:#{host_port}/taco?p=#{urlToken}"],
       :triggerWords => [":taco:"],
       :channel => "##{channel}",
-      :scriptEnabled => false
+      :scriptEnabled => true,
+      :script => script
     }
     Api.addInt server, port, user, userId, authToken, data
   end
