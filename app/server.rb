@@ -17,6 +17,20 @@ $userId = ""
 $authToken = ""
 $urlToken = Api.genToken()
 
+ranks = [
+  5,
+  10,
+  25,
+  50,
+  100,
+  250,
+  500,
+  1000,
+  2500,
+  5000,
+  10000
+]
+
 def login server, port, user, password
   u, a = Api.login server, port, user, password
   if u
@@ -116,6 +130,11 @@ post "/taco" do
     Api.directMessage $server, $port, $userId, $authToken, user, "You have successfully given #{quant} tacos to @#{users.join(', @')}!"
     for receiver in users
       Api.directMessage $server, $port, $userId, $authToken, receiver, "You have received #{quant} tacos from @#{user}!"
+      tacos = Db.getUserStats(db, "GLOBAL", 10000000, receiver, "receiver")[1]
+      if ranks.include?(tacos)
+        level = ranks.index(tacos) + 1
+        Api.directMessage $server, $port, $userId, $authToken, receiver, ":trophy: Congratulations, you are now level #{level}!"
+      end
     end
   else
     Api.directMessage $server, $port, $userId, $authToken, user, "You don't have enough tacos to give #{quant} taco(s) to #{users.join(', ')}"
