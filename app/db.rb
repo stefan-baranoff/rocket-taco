@@ -18,6 +18,10 @@ module Db
     db
   end
 
+  def Db.entry_format str
+    return str.gsub("[^a-zA-Z0-9]", "_")
+  end
+
   def Db.ensureTableExists db, name, columns, types
     values = []
     for col in 0..(columns.length-1)
@@ -45,7 +49,8 @@ module Db
       Db.ensureTableExists db, "tacos", ['user', 'amount'], ['string', 'int']
       Db.ensureTableExists db, "GLOBAL", ['time', 'giver', 'receiver', 'amount', 'reason'], ['real', 'string', 'string', 'int', 'string']
       for chan in channels
-        Db.ensureTableExists db, chan[0], ['time', 'giver', 'receiver', 'amount', 'reason'], ['real', 'string', 'string', 'int', 'string']
+        c = Db.entry_format chan[0]
+        Db.ensureTableExists db, c, ['time', 'giver', 'receiver', 'amount', 'reason'], ['real', 'string', 'string', 'int', 'string']
       end
       db
   end
@@ -68,6 +73,12 @@ module Db
   end
 
   def Db.insertTaco db, chan, giver, receiver, quant, reason
+    chan = Db.entry_format chan
+    giver = Db.entry_format giver
+    for i in 0..(receiver.length-1)
+      receiver[i] = Db.entry_format receiver[i]
+    end
+    reason = Db.entry_format reason
     Db.ensureDatumExists db, "tacos", "user", giver, ["'#{giver}'", 5]
     tacos_left = db.execute("select amount from tacos where user = '#{giver}'")[0][0]
     if tacos_left >= quant * receiver.length
@@ -82,6 +93,7 @@ module Db
   end
 
   def Db.getTacos db, user
+    user = Db.entry_format user
     Db.ensureDatumExists db, "tacos", "user", user, ["'#{user}'", 5]
     db.execute("select amount from tacos where user = '#{user}'")[0][0]
   end
@@ -96,6 +108,7 @@ module Db
   )
 
   def Db.getLeaderBoard db, channel, timeframe, limit
+    channel = Db.entry_format channel
     current_date = DateTime.now.amjd().to_f
     oldest_date = current_date - timeframe
     recv = db.execute(
@@ -118,6 +131,8 @@ module Db
   end
 
   def Db.getUserStats db, channel, timeframe, user, type
+    channel = Db.entry_format channel
+    user = Db.entry_format user
     current_date = DateTime.now.amjd().to_f
     oldest_date = current_date - timeframe
     query = $leaderboard_query % {
