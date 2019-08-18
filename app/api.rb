@@ -176,4 +176,29 @@ module Api
     puts HTTParty.post(url, :headers => headers, :body => data.to_json()).parsed_response
   end
 
+  def Api.validateUsername server, port, userId, authToken, username
+    url = Api.getUrl server, port, "users.list"
+    headers = Api.getHeaders userId, authToken
+    resp = HTTParty.get(url, :headers => headers).parsed_response
+    for user in resp["users"]
+      puts "#{username}, #{user['username']}"
+      if username == user["username"]
+        return true
+      end
+    end
+    return false
+  end
+
+  def Api.validateChannel server, port, userId, authToken, channel
+    url = Api.getUrl server, port, "channels.list"
+    headers = Api.getHeaders userId, authToken
+    resp = HTTParty.get(url, :headers => headers).parsed_response
+    for chan in resp["channels"]
+      if channel == chan["name"]
+        return true
+      end
+    end
+    return false
+  end
+
 end

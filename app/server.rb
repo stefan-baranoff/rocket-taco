@@ -97,7 +97,7 @@ get "/update" do
   $user = params[:user]
   $password = params[:password]
   Db.saveSettings db, $host, $host_port, $server, $port, $user, $password
-  if params[:channels]
+  if (params[:channels] and Api.validateChannel $server, $port, $userId, $authToken, params[:channels])
     Api.removeChannelInt $server, $port, $userId, $authToken, params[:channels]
     Api.addChannelInt $server, $port, $user, $userId, $authToken, params[:channels], $host, $host_port, $urlToken
   end
@@ -108,6 +108,12 @@ end
 post "/taco" do
   req= JSON.parse(request.body.read)
   user, msg, channel = req["user_name"], req["text"], req["channel_name"]
+  if !Api.validateChannel $server, $port, $userId, $authToken, channel
+    return
+  end
+  if !Api.validateUsername $server, $port, $userId, $authToken, user
+    return
+  end
   if params[:p] != Digest::MD5.hexdigest($urlToken + msg + Time.now.to_i.to_s)
     return
   end
@@ -116,6 +122,10 @@ post "/taco" do
   reason = []
   for word in msg.split(" ")
     if word[0] == "@"
+      if (!Api.validateUsername($server, $port, $userId, $authToken, word[1..-1]))
+        Api.directMessage $server, $port, $userId, $authToken, user, "Could not find user #{word}."
+        return
+      end
       users.push(word[1..-1])
     elsif word == ":taco:"
       quant += 1
@@ -144,6 +154,9 @@ end
 post "/command" do
   req= JSON.parse(request.body.read)
   user, msg, channel = req["user_name"], req["text"], req["channel_id"]
+  if !Api.validateUsername $server, $port, $userId, $authToken, user
+    return
+  end
   if msg.include? "!tacos"
     tacos = Db.getTacos db, user
     Api.sendMessage $server, $port, $userId, $authToken, channel, "You have #{tacos} tacos"
@@ -176,6 +189,10 @@ post "/command" do
       if $channel_stat.include? word.sub("#", "")
         chan = word.sub("#", "")
       end
+    end
+    if chan != "GLOBAL" and !Api.validateChannel $server, $port, $userId, $authToken, chan
+      Api.sendMessage $server, $port, $userId, $authToken, channel, "Could not find channel ##{chan}"
+      return
     end
     rlb, glb = Db.getLeaderBoard db, chan, timeframe, true
     text = "*Leaderboard for ##{chan} this #{timeframe_name}:*\n*Most Tacos Received*\n"
@@ -216,6 +233,9 @@ end
 
 get "/leaderboard" do
   chan = params[:channel] ? params[:channel] : "GLOBAL"
+  if (chan != "GLOBAL" and !Api.validateChannel $server, $port, $userId, $authToken, chan)
+    chan = "GLOBAL"
+  end
   timeframes = {"day" => 1, "week" => 7, "month" => 30, "year" => 365, "century" => 36500}
   timeframe = params[:timeframe] ? params[:timeframe] : "year"
   length = timeframes[timeframe]
