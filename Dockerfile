@@ -7,4 +7,4 @@ ADD app /app
 
 WORKDIR /app
 
-CMD ruby server.rb
+CMD ruby scripts/reset_taco_quotas.rb & ruby server.rb
