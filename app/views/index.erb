@@ -2,6 +2,15 @@
   <head>
     <title> Rocket Taco Control Panel </title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+      .form-element-label {
+        width: 40%;
+      }
+      .form-table {
+        width: 50%;
+        border: 0px;
+      }
+    </style>
   </head>
   <body>
     <table>
@@ -12,28 +21,11 @@
     </table>
     <hr/>
 
-    <h3> Status <span class='<%= {"Not Connected" => "badge badge-danger", "Connected" => "badge badge-success"}[status] %>' > <%= status  %> </span> </h3>
-
-    <h3> Settings </h3>
+    <h3> Rocket.Chat Settings <span class='<%= {"Not Connected" => "badge badge-danger", "Connected" => "badge badge-success"}[status] %>' > <%= status  %> </span> </h3>
     <form method=GET action=/update>
-      <table style="width: 600px" border=0>
+      <table class=form-table>
         <tr>
-          <td> Bot IP or FQDN </td>
-          <td>
-            <div class="input-group mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text" id="basic-addon1">http://</span>
-              </div>
-              <input type="text" class="form-control" name=host value=<%= host %> size=13>
-            </td>
-          </td>
-        </tr>
-        <tr>
-          <td> Bot Port </td>
-          <td><div class="input-group mb-3"> <input class="form-control" name=host_port value=<%= host_port %> /> </div> </td>
-        </tr>
-        <tr>
-          <td> Rocket.Chat Server </td>
+          <td class=form-element-label > Rocket.Chat Server IP / FQDN </td>
           <td>
             <div class="input-group mb-3">
               <div class="input-group-prepend">
@@ -44,25 +36,79 @@
           </td>
         </tr>
         <tr>
-          <td> Rocket.Chat Port </td>
+          <td class=form-element-label > Rocket.Chat Port </td>
           <td><div class="input-group mb-3"> <input class="form-control" name=port value=<%= port %> > </div></td>
         </tr>
         <tr>
-          <td> Rocket Taco Username </td>
+          <td class=form-element-label > Rocket Taco Username </td>
           <td> <div class="input-group mb-3"><input class="form-control" name=user value=<%= user %>> </div></td>
         </tr>
         <tr>
-          <td> Rocket Taco Password </td>
+          <td class=form-element-label > Rocket Taco Password </td>
           <td><div class="input-group mb-3"> <input class="form-control" type=password name=password value=<%= password %>> </div></td>
         </tr>
       </table>
 
+      <h3> Bot Settings </h3>
+      <table class=form-table>
+        <tr>
+          <td class=form-element-label > Bot IP or FQDN </td>
+          <td>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="basic-addon1">http://</span>
+              </div>
+              <input type="text" class="form-control" name=host value=<%= host %> size=13>
+            </td>
+          </td>
+        </tr>
+        <tr>
+          <td class=form-element-label > Bot Port </td>
+          <td><div class="input-group mb-3"> <input class="form-control" name=host_port value=<%= host_port %> /> </div> </td>
+        </tr>
+      </table>
+
+      <h3> Database Settings <span class='<%= {"Not Connected" => "badge badge-danger", "Connected" => "badge badge-success"}[dbconnected] %>' > <%= dbconnected  %> </span> </h3>
+      <table class=form-table>
+        <tr>
+          <td class=form-element-label> Database Type </td>
+          <td class="input-group mb-3">
+             <select class=form-control id=dbtype name=dbtype onchange="javascript:onDbTypeChange();">
+               <option> Sqlite </option>
+               <option> Postgres </option>
+             </select>
+          </td>
+        </tr>
+      </table>
+      <table class=form-table>
+        <tr>
+          <td class=form-element-label > Database IP / FQDN </td>
+          <td><div class="input-group mb-3">  <input type="text" class="form-control" disabled name=dbhost id=dbhost value=<%= dbhost %> ></div> </td>
+        </tr>
+        <tr>
+          <td class=form-element-label > Database Port </td>
+          <td><div class="input-group mb-3"> <input class="form-control" disabled name=dbport id=dbport value=<%= dbport %> > </div></td>
+        </tr>
+        <tr>
+          <td class=form-element-label > Database Name </td>
+          <td> <div class="input-group mb-3"><input class="form-control" disabled name=dbname id=dbname value=<%= dbname %>> </div></td>
+        </tr>
+        <tr>
+          <td class=form-element-label > Database Username </td>
+          <td> <div class="input-group mb-3"><input class="form-control" disabled name=dbuser id=dbuser value=<%= dbuser %>> </div></td>
+        </tr>
+        <tr>
+          <td class=form-element-label > Database Password </td>
+          <td><div class="input-group mb-3"> <input class="form-control" type=password disabled name=dbpass id=dbpass value=<%= dbpass %>> </div></td>
+        </tr>
+      </table>
+
       <h3> Channels </h3>
-      <table style="width: 650px" border=0>
+      <table class=form-table>
         <% for channel in channels %>
           <%= "<tr>" %>
             <%= "<td> # #{channel[0]} </td>" %>
-            <%= "<td> <input name=channels value=#{channel[0]} type=radio> <span class='#{{"Connected" => "badge badge-success", "Not Connected" => "badge badge-danger"}[channel_stat[channel[0]]]}'> #{channel_stat[channel[0]]} </span> </td>" %>
+            <%= "<td > <input name=channels value=#{channel[0]} type=radio> <span class='#{{"Connected" => "badge badge-success", "Not Connected" => "badge badge-danger"}[channel_stat[channel[0]]]}'> #{channel_stat[channel[0]]} </span> </td>" %>
           <%= "</tr>" %>
         <% end %>
         <tr>
@@ -72,4 +118,14 @@
     </form>
     </font>
   </body>
+
+  <script type=text/javascript>
+    function onDbTypeChange() {
+      var type = document.getElementById("dbtype").value;
+      var elems = ["dbhost", "dbport", "dbname", "dbuser", "dbpass"];
+      for (var elem of elems) {
+        document.getElementById(elem).disabled = (type == "Sqlite");
+      }
+    }
+  </script>
 </html>

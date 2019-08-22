@@ -46,6 +46,11 @@ module Db
       Db.ensureDatumExists db, "settings", "key", "port", ["'port'", "'3000'"]
       Db.ensureDatumExists db, "settings", "key", "username", ["'username'", "'rocket_taco'"]
       Db.ensureDatumExists db, "settings", "key", "password", ["'password'", "'taco'"]
+      Db.ensureDatumExists db, "settings", "key", "dbhost", ["'dbhost'", "'127.0.0.1'"]
+      Db.ensureDatumExists db, "settings", "key", "dbport", ["'dbport'", "'5432'"]
+      Db.ensureDatumExists db, "settings", "key", "dbname", ["'dbname'", "'rocket_taco'"]
+      Db.ensureDatumExists db, "settings", "key", "dbuser", ["'dbuser'", "'rocket_taco'"]
+      Db.ensureDatumExists db, "settings", "key", "dbpass", ["'dbpass'", "'taco'"]
       Db.ensureTableExists db, "tacos", ['user', 'amount'], ['string', 'int']
       Db.ensureTableExists db, "GLOBAL", ['time', 'giver', 'receiver', 'amount', 'reason'], ['real', 'string', 'string', 'int', 'string']
       for chan in channels
@@ -60,16 +65,33 @@ module Db
     for setting in db.execute "select * from settings"
       settings[setting[0]] = setting[1]
     end
-    [settings["host"],settings["host_port"].to_i(),settings["server"],settings["port"].to_i(),settings["username"],settings["password"]]
+    [
+      settings["host"],
+      settings["host_port"].to_i(),
+      settings["server"],
+      settings["port"].to_i(),
+      settings["username"],
+      settings["password"],
+      settings["dbhost"],
+      settings["dbport"],
+      settings["dbname"],
+      settings["dbuser"],
+      settings["dbpass"]
+    ]
   end
 
-  def Db.saveSettings db, host, host_port, server, port, user, password
+  def Db.saveSettings db, host, host_port, server, port, user, password, dbhost, dbport, dbname, dbuser, dbpass
     db.execute "update settings set value = '#{host}' where key = 'host'"
     db.execute "update settings set value = '#{host_port}' where key = 'host_port'"
     db.execute "update settings set value = '#{server}' where key = 'server'"
     db.execute "update settings set value = '#{port}' where key = 'port'"
     db.execute "update settings set value = '#{user}' where key = 'user'"
     db.execute "update settings set value = '#{password}' where key = 'password'"
+    db.execute "update settings set value = '#{dbhost}' where key = 'dbhost'"
+    db.execute "update settings set value = '#{dbport}' where key = 'dbport'"
+    db.execute "update settings set value = '#{dbname}' where key = 'dbname'"
+    db.execute "update settings set value = '#{dbuser}' where key = 'dbuser'"
+    db.execute "update settings set value = '#{dbpass}' where key = 'dbpass'"
   end
 
   def Db.insertTaco db, chan, giver, receiver, quant, reason

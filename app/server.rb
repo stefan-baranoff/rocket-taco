@@ -8,7 +8,7 @@ require_relative 'db'
 set :bind => "0.0.0.0"
 
 db = Db.init []
-$host, $host_port, $server, $port, $user, $password = Db.loadSettings db
+$host, $host_port, $server, $port, $user, $password, $dbhost, $dbport, $dbname, $dbuser, $dbpass  = Db.loadSettings db
 
 $channels = []
 $ints = []
@@ -16,6 +16,7 @@ $channel_stat = {}
 $userId = ""
 $authToken = ""
 $urlToken = Api.genToken()
+$dbconnected = "Not Connected"
 
 ranks = [
   5,
@@ -83,7 +84,13 @@ get "/" do
     :channels=>$channels,
     :channel_stat=>$channel_stat,
     :host=>$host,
-    :host_port=>$host_port
+    :host_port=>$host_port,
+    :dbhost => $dbhost,
+    :dbport => $dbport,
+    :dbname => $dbname,
+    :dbuser => $dbuser,
+    :dbpass => $dbpass,
+    :dbconnected => $dbconnected
   }
   erb :index, :locals => locals
 end
@@ -96,7 +103,12 @@ get "/update" do
   $port = params[:port]
   $user = params[:user]
   $password = params[:password]
-  Db.saveSettings db, $host, $host_port, $server, $port, $user, $password
+  $dbhost = params[:dbhost]
+  $dbport = params[:dbport]
+  $dbname = params[:dbname]
+  $dbuser = params[:dbuser]
+  $dbpass = params[:dbpass]
+  Db.saveSettings db, $host, $host_port, $server, $port, $user, $password, $dbhost, $dbport, $dbname, $dbuser, $dbpass
   if (params[:channels] and Api.validateChannel $server, $port, $userId, $authToken, params[:channels])
     Api.removeChannelInt $server, $port, $userId, $authToken, params[:channels]
     Api.addChannelInt $server, $port, $user, $userId, $authToken, params[:channels], $host, $host_port, $urlToken
