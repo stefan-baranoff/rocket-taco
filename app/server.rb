@@ -227,7 +227,7 @@ post "/command" do
       text += "Gave #{give_stats[1]} tacos, place #{give_stats[0]} on leaderboard\n"
     end
     text += "\nFull Leaderboard: http://#{$host}:#{$host_port}/leaderboard?timeframe=#{timeframe_name}&channel=#{chan}"
-    puts Api.sendMessage $server, $port, $userId, $authToken, channel, text
+    Api.sendMessage $server, $port, $userId, $authToken, channel, text
   end
 end
 

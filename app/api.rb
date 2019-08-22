@@ -1,6 +1,9 @@
 require 'httparty'
+require 'logger'
 
 module Api
+
+  @@logger = Logger.new($stdout)
 
   def Api.genToken()
     letters = '0123456789ABCDEF'
@@ -30,11 +33,11 @@ module Api
     begin
       resp = HTTParty.post(url, :body => data.to_json(), :headers => headers)
     rescue
-      puts "Error logging in: Failed to connect to server"
+      @@logger.error "Error logging in: Failed to connect to server"
       return [false, false]
     end
     if resp.parsed_response["status"] == "error"
-      puts "Error logging in: %s" % [resp.parsed_response["error"]]
+      @@logger.error "Error logging in: %s" % [resp.parsed_response["error"]]
       return [false, false]
     end
     [resp.parsed_response["data"]["userId"], resp.parsed_response["data"]["authToken"]]
@@ -173,7 +176,7 @@ module Api
     url = Api.getUrl server, port, "users.setAvatar"
     headers = Api.getHeaders userId, authToken
     data = {:avatarUrl => "http://#{host}:#{host_port}/icon.png"}
-    puts HTTParty.post(url, :headers => headers, :body => data.to_json()).parsed_response
+    HTTParty.post(url, :headers => headers, :body => data.to_json()).parsed_response
   end
 
   def Api.validateUsername server, port, userId, authToken, username
@@ -181,7 +184,6 @@ module Api
     headers = Api.getHeaders userId, authToken
     resp = HTTParty.get(url, :headers => headers).parsed_response
     for user in resp["users"]
-      puts "#{username}, #{user['username']}"
       if username == user["username"]
         return true
       end
