@@ -105,7 +105,18 @@ module Api
     Api.addInt server, port, user, userId, authToken, data
   end
 
-  def Api.addGlobalInt server, port, user, userId, authToken, host, host_port
+  def Api.removeAllInts server, port, userId, authToken
+    url = Api.getUrl server, port, "integrations.remove"
+    headers = Api.getHeaders userId, authToken
+    for int in Api.listInt(server, port, userId, authToken)
+      if int[0].include? "Rocket Taco "
+        data = {:type=>"webhook-outgoing", :integrationId=>int[1]}
+        HTTParty.post(url, :headers => headers, :body => data.to_json())
+      end
+    end
+  end
+
+  def Api.addGlobalInt server, port, user, userId, authToken, host, host_port, urlToken
     data = {
       :type => "webhook-outgoing",
       :name => "Rocket Taco Global",
@@ -114,6 +125,33 @@ module Api
       :username => user,
       :urls => ["http://#{host}:#{host_port}/command"],
       :channel => "@#{user}",
+      :scriptEnabled => false
+    }
+    Api.addInt server, port, user, userId, authToken, data
+    script = File.open("scripts/rocketchat_rest.js", "r").read
+    channel = 'all_public_channels,all_private_groups,all_direct_messages'
+    data = {
+      :type => "webhook-outgoing",
+      :name => "Rocket Taco Tacos - #{channel}",
+      :enabled => true,
+      :event => "sendMessage",
+      :username => user,
+      :urls => ["http://#{host}:#{host_port}/taco?p=#{urlToken}"],
+      :triggerWords => [":taco:"],
+      :channel => "#{channel}",
+      :scriptEnabled => true,
+      :script => script
+    }
+    Api.addInt server, port, user, userId, authToken, data
+    data = {
+      :type => "webhook-outgoing",
+      :name => "Rocket Taco Mention - #{channel}",
+      :enabled => true,
+      :event => "sendMessage",
+      :username => user,
+      :triggerWords => ["@rocket_taco"],
+      :urls => ["http://#{host}:#{host_port}/command"],
+      :channel => "#{channel}",
       :scriptEnabled => false
     }
     Api.addInt server, port, user, userId, authToken, data
@@ -131,14 +169,22 @@ module Api
   end
 
   def Api.directMessageUsers server, port, userId, authToken, room
-    url = Api.getUrl server, port, "im.members?roomId=#{room}"
-    headers = Api.getHeaders userId, authToken
-    resp = HTTParty.get(url, :headers => headers).parsed_response
-    names = []
-    for member in resp["members"]
-      names.push member["username"]
+    begin
+      url = Api.getUrl server, port, "im.members?roomId=#{room}"
+      headers = Api.getHeaders userId, authToken
+      resp = HTTParty.get(url, :headers => headers)
+      parsed_resp = resp.parsed_response
+      names = []
+      if parsed_resp.key?("members")
+        for member in parsed_resp["members"]
+          names.push member["username"]
+        end
+      end
+      names
+    rescue
+      @@logger.error "Direct message users failed: Code %d message %s body %s" % [resp.code, resp.message, resp.body]
+      return []
     end
-    names
   end
 
   def Api.createDirectMessage server, port, userId, authToken, user
@@ -157,19 +203,23 @@ module Api
   end
 
   def Api.directMessage server, port, userId, authToken, user, msg
-    direct_messages = Api.listDirectMessages server, port, userId, authToken
-    room = nil
-    for direct_message in direct_messages
-      users = Api.directMessageUsers(server, port, userId, authToken, direct_message)
-      if users.include? user
-        room = direct_message
-        break
+    begin
+      direct_messages = Api.listDirectMessages server, port, userId, authToken
+      room = nil
+      for direct_message in direct_messages
+        users = Api.directMessageUsers(server, port, userId, authToken, direct_message)
+        if users.include? user
+          room = direct_message
+          break
+        end
       end
+      if room == nil
+        room = Api.createDirectMessage server, port, userId, authToken, user
+      end
+      Api.sendMessage server, port, userId, authToken, room, msg
+    rescue
+      @@logger.error "Failed to send message to %s: %s" % [user, msg]
     end
-    if room == nil
-      room = Api.createDirectMessage server, port, userId, authToken, user
-    end
-    Api.sendMessage server, port, userId, authToken, room, msg
   end
 
   def Api.setAvatar server, port, userId, authToken, host, host_port
@@ -180,15 +230,19 @@ module Api
   end
 
   def Api.validateUsername server, port, userId, authToken, username
-    url = Api.getUrl server, port, "users.list"
-    headers = Api.getHeaders userId, authToken
-    resp = HTTParty.get(url, :headers => headers).parsed_response
-    for user in resp["users"]
-      if username == user["username"]
-        return true
-      end
+    begin
+       url = Api.getUrl server, port, "users.list"
+       headers = Api.getHeaders userId, authToken
+       resp = HTTParty.get(url, :headers => headers).parsed_response
+       for user in resp["users"]
+         if username == user["username"]
+           return true
+         end
+       end
+       return false
+    rescue
+       return false
     end
-    return false
   end
 
   def Api.validateChannel server, port, userId, authToken, channel

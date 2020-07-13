@@ -27,13 +27,13 @@ module Db
     for col in 0..(columns.length-1)
       values.push columns[col]+" "+types[col]
     end
-    db.execute "create table if not exists #{name} (#{values.join(", ")});"
+    db.execute "create table if not exists [#{name}] (#{values.join(", ")});"
   end
 
   def Db.ensureDatumExists db, table, col, value, datas
-    rows = db.execute "select * from #{table} where #{col} = '#{value}'"
+    rows = db.execute "select * from [#{table}] where #{col} = '#{value}'"
     if rows.length == 0
-      db.execute "insert into #{table} values (#{datas.join(', ')})"
+      db.execute "insert into [#{table}] values (#{datas.join(', ')})"
     end
   end
 
@@ -41,7 +41,7 @@ module Db
       db = Db.open
       Db.ensureTableExists db, "settings", ["key", "value"], ["string", "string"]
       Db.ensureDatumExists db, "settings", "key", "host", ["'host'", "'localhost'"]
-      Db.ensureDatumExists db, "settings", "key", "host_port", ["'host_port'", "'4567'"]
+      Db.ensureDatumExists db, "settings", "key", "host_port", ["'host_port'", "'7870'"]
       Db.ensureDatumExists db, "settings", "key", "server", ["'server'", "'localhost'"]
       Db.ensureDatumExists db, "settings", "key", "port", ["'port'", "'3000'"]
       Db.ensureDatumExists db, "settings", "key", "username", ["'username'", "'rocket_taco'"]
@@ -101,11 +101,12 @@ module Db
       receiver[i] = Db.entry_format receiver[i]
     end
     reason = Db.entry_format reason
-    Db.ensureDatumExists db, "tacos", "user", giver, ["'#{giver}'", 5]
+    Db.ensureTableExists db, chan, ['time', 'giver', 'receiver', 'amount', 'reason'], ['real', 'string', 'string', 'int', 'string']
+    Db.ensureDatumExists db, "tacos", "user", giver, ["'#{giver}'", 10]
     tacos_left = db.execute("select amount from tacos where user = '#{giver}'")[0][0]
     if tacos_left >= quant * receiver.length
       for recv in receiver
-        db.execute "insert into #{chan} values (julianday('now'), '#{giver}', '#{recv}', #{quant}, '#{reason}');"
+        db.execute "insert into [#{chan}] values (julianday('now'), '#{giver}', '#{recv}', #{quant}, '#{reason}');"
         db.execute "insert into GLOBAL values (julianday('now'), '#{giver}', '#{recv}', #{quant}, '#{reason}');"
       end
       db.execute "update tacos set amount = #{tacos_left - quant * receiver.length} where user = '#{giver}'"
@@ -116,7 +117,7 @@ module Db
 
   def Db.getTacos db, user
     user = Db.entry_format user
-    Db.ensureDatumExists db, "tacos", "user", user, ["'#{user}'", 5]
+    Db.ensureDatumExists db, "tacos", "user", user, ["'#{user}'", 10]
     db.execute("select amount from tacos where user = '#{user}'")[0][0]
   end
 

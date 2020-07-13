@@ -6,6 +6,7 @@ require_relative 'api'
 require_relative 'db'
 
 set :bind => "0.0.0.0"
+set :port => 7870
 
 db = Db.init []
 $host, $host_port, $server, $port, $user, $password, $dbhost, $dbport, $dbname, $dbuser, $dbpass  = Db.loadSettings db
@@ -58,17 +59,17 @@ def update server, port, user, password
         $channel_stat[int[2][0][1..-1]] = "Connected"
       end
     end
+    Api.removeAllInts $server, $port, $userId, $authToken
+    Api.addGlobalInt $server, $port, $user, $userId, $authToken, $host, $host_port, $urlToken
     for channel in $channel_stat.keys()
       if ($channel_stat[channel] == "Connected")
         Api.removeChannelInt $server, $port, $userId, $authToken, channel
         Api.addChannelInt $server, $port, $user, $userId, $authToken, channel, $host, $host_port, $urlToken
       end
     end
-    if global_int == false
-      Api.addGlobalInt $server, $port, $user, $userId, $authToken,  $host, $host_port
-    end
     Api.setAvatar $server, $port, $userId, $authToken, $host, $host_port
   end
+  db = Db.init $channels
 end
 
 update $server, $port, $user, $password
@@ -120,14 +121,15 @@ end
 post "/taco" do
   req= JSON.parse(request.body.read)
   user, msg, channel = req["user_name"], req["text"], req["channel_name"]
-  if !Api.validateChannel $server, $port, $userId, $authToken, channel
-    return
-  end
+  #if !Api.validateChannel $server, $port, $userId, $authToken, channel
+  #  return
+  #end
   if !Api.validateUsername $server, $port, $userId, $authToken, user
     return
   end
-  if params[:p] != Digest::MD5.hexdigest($urlToken + msg + Time.now.to_i.to_s)
-    return
+  checkval = Digest::MD5.hexdigest($urlToken + msg + Time.now.to_i.to_s)
+  if params[:p] != checkval
+    print "MD5 games failed: " + params[:p] + " != " + checkval
   end
   quant = 0
   users = []
@@ -148,6 +150,8 @@ post "/taco" do
   reason = reason.join " "
   if users.include? user
     Api.directMessage $server, $port, $userId, $authToken, user, "You cannot give tacos to yourself."
+  elsif users.length == 0
+    return
   elsif Db.insertTaco db, channel, user, users, quant, reason
     Api.directMessage $server, $port, $userId, $authToken, user, "You have successfully given #{quant} tacos to @#{users.join(', @')}!"
     for receiver in users
@@ -270,4 +274,8 @@ end
 
 get "/icon.png" do
   send_file 'views/icon.png'
+end
+
+get "/bootstrap.min.css" do
+  send_file 'views/bootstrap.min.css'
 end
