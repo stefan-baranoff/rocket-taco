@@ -52,15 +52,17 @@ def update server, port, user, password
     end
     global_int = false
     for int in $ints
-      if int[0].include? "Rocket Taco"
+      if int[0].include? "RocketTaco"
         if int[0].include? "Global"
           global_int = true
         end
         $channel_stat[int[2][0][1..-1]] = "Connected"
       end
     end
-    Api.removeAllInts $server, $port, $userId, $authToken
-    Api.addGlobalInt $server, $port, $user, $userId, $authToken, $host, $host_port, $urlToken
+    if global_int == false
+      Api.removeAllInts $server, $port, $userId, $authToken
+      Api.addGlobalInt $server, $port, $user, $userId, $authToken, $host, $host_port, $urlToken
+    end
     for channel in $channel_stat.keys()
       if ($channel_stat[channel] == "Connected")
         Api.removeChannelInt $server, $port, $userId, $authToken, channel
@@ -74,6 +76,7 @@ end
 
 update $server, $port, $user, $password
 db = Db.init $channels
+$logger = Logger.new($stdout)
 
 get "/" do
   locals = {
@@ -129,7 +132,7 @@ post "/taco" do
   end
   checkval = Digest::MD5.hexdigest($urlToken + msg + Time.now.to_i.to_s)
   if params[:p] != checkval
-    print "MD5 games failed: " + params[:p] + " != " + checkval
+    logger.info "MD5 games failed: " + params[:p] + " != " + checkval
   end
   quant = 0
   users = []
